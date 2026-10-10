@@ -839,10 +839,11 @@ git push origin feature/awesome-module
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- ░░░░░░░░░░░░░░░░░░░░░░░ FOOTER ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<img src="https://github.com/user-attachments/assets/9bfe1f82-7b50-4394-9b0c-bd9df824719e"/>
 
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=18&duration=3000&pause=1000&color=A371F7&center=true&vCenter=true&width=700&lines=If+you+find+this+useful%2C+give+it+a+%E2%AD%90+on+GitHub!;Happy+hunting!+%F0%9F%8E%AF" alt="Footer typing"/>
+<img src="https://github.com/user-attachments/assets/9bfe1f82-7b50-4394-9b0c-bd9df824719e" alt="Footer typing"/>
 
 <br/><br/>
 
