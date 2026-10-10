@@ -1,0 +1,20 @@
+# ---------- Basic external URL ----------
+https://bing.com
+http://bing.com
+//bing.com
+///bing.com
+////bing.com
+/bing.com
+\\bing.com
+%2F%2Fbing.com
+%252F%252Fbing.com
+https%3A%2F%2Fbing.com
+%5C%5Cbing.com
+https:bing.com
+https:/bing.com
+
+# ---------- Common trusted domains (for bypass testing) ----------
+https://google.com
+https://evil.com
+https://attacker.com
+https://example.com
