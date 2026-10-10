@@ -185,7 +185,7 @@ go build -o chimerascan .
 ### ⚡ One-liner Install
 
 ```bash
-go install github.com/YOUR_USERNAME/ChimeraScan@latest
+go install github.com/KimHyunRuiixyn/ChimeraScan@latest
 ```
 
 ---
@@ -761,32 +761,10 @@ go build -o chimerascan .
 ---
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- ░░░░░░░░░░░░░░░░░░░░░ CONTRIBUTING ░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 align="center">🤝 Contributing</h2>
-
-```bash
-# 1. Fork the repo
-# 2. Create your branch
-git checkout -b feature/awesome-module
-
-# 3. Commit your changes
-git commit -m 'Add XXE module'
-
-# 4. Push to your branch
-git push origin feature/awesome-module
-
-# 5. Open a Pull Request 🎉
-```
-
----
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- ░░░░░░░░░░░░░░░░░░░░░░ ACKNOWLEDGEMENTS ░░░░░░░░░░░░░░░░░░░░░░ -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 
-<h2 align="center">🙏 Acknowledgements</h2>
+<h2 align="center">Acknowledgements</h2>
 
 <div align="center">
 
