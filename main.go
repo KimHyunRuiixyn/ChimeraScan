@@ -21,9 +21,6 @@ import (
 	"time"
 )
 
-// ==================================================================
-// Colors
-// ==================================================================
 const (
 	cReset  = "\033[0m"
 	cRed    = "\033[91m"
@@ -36,9 +33,11 @@ const (
 	cBold   = "\033[1m"
 )
 
-// ==================================================================
-// Paths
-// ==================================================================
+const (
+	authorName = "KimHyunRuiixyn"
+	repoURL    = "github.com/KimHyunRuiixyn/ChimeraScan"
+)
+
 const (
 	fuzzPlaceholder = "FUZZ"
 
@@ -57,13 +56,11 @@ const (
 	defaultUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 
-// ==================================================================
-// Globals
-// ==================================================================
 var (
 	httpClient    *http.Client
 	verbose       bool
-	hitLimit      int   // 0 = unlimited (scan all payloads)
+	hitLimit      int
+	delayMs       int64 // delay betwn
 	printMu       sync.Mutex
 	reqCount      int64
 	hitCount      int64
@@ -76,9 +73,6 @@ var (
 	uaRandomize bool
 )
 
-// ==================================================================
-// Ctrl+C handler
-// ==================================================================
 func init() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -104,7 +98,6 @@ func shouldStop() bool {
 	return atomic.LoadInt32(&stopRequested) == 1
 }
 
-// reachedHitLimit: return true kalau hitLimit > 0 DAN hitCount >= hitLimit
 func reachedHitLimit() bool {
 	if hitLimit <= 0 {
 		return false
@@ -112,9 +105,6 @@ func reachedHitLimit() bool {
 	return atomic.LoadInt64(&hitCount) >= int64(hitLimit)
 }
 
-// ==================================================================
-// User-Agent rotation
-// ==================================================================
 func loadUserAgents(path string) {
 	userAgents = nil
 	if path != "" {
@@ -153,17 +143,11 @@ func nextUA() string {
 	return ua
 }
 
-// ==================================================================
-// Signature struct
-// ==================================================================
 type Signature struct {
 	Name string
 	Re   *regexp.Regexp
 }
 
-// ==================================================================
-// LFI signatures
-// ==================================================================
 var lfiSignatures = []Signature{
 	{"passwd-root", regexp.MustCompile(`root:[^:]*:0:0:`)},
 	{"passwd-daemon", regexp.MustCompile(`daemon:[^:]*:[0-9]+:[0-9]+:`)},
@@ -186,9 +170,6 @@ var lfiSignatures = []Signature{
 	{"script-base64", regexp.MustCompile(`PHNjcmlwd`)},
 }
 
-// ==================================================================
-// SSRF signatures
-// ==================================================================
 var ssrfSignatures = []Signature{
 	{"passwd-root", regexp.MustCompile(`root:[^:]*:0:0:`)},
 	{"apache-default", regexp.MustCompile(`<title>Apache2? (Ubuntu )?Default Page`)},
@@ -210,9 +191,6 @@ var ssrfSignatures = []Signature{
 	{"memcached", regexp.MustCompile(`STAT pid`)},
 }
 
-// ==================================================================
-// CRLF signatures
-// ==================================================================
 var crlfHeaders = []Signature{
 	{"crlf-location-evil", regexp.MustCompile(`(?i)location\s*:\s*(http[s]?:)?//?www\.evil\.com`)},
 	{"crlf-set-cookie", regexp.MustCompile(`(?i)set-cookie\s*:\s*coffin\s*=\s*hi`)},
@@ -224,9 +202,6 @@ var crlfStatuses = map[int]bool{
 	206: true, 207: true, 301: true, 302: true, 307: true, 308: true,
 }
 
-// ==================================================================
-// Open Redirect matcher
-// ==================================================================
 var orStatuses = map[int]bool{
 	301: true, 302: true, 303: true, 307: true, 308: true,
 }
@@ -251,9 +226,6 @@ func matchOpenRedirect(status int, headers http.Header) ([]string, string) {
 	return []string{"open-redirect-location-bing"}, proof
 }
 
-// ==================================================================
-// XSS matcher (raw reflection)
-// ==================================================================
 func matchXSSReflection(body, payload string) ([]string, string) {
 	if payload == "" {
 		return nil, ""
@@ -284,9 +256,6 @@ func matchXSSReflection(body, payload string) ([]string, string) {
 	return []string{"xss-reflected-raw"}, proof
 }
 
-// ==================================================================
-// Matchers
-// ==================================================================
 func matchSignatureSet(sigs []Signature, body string) ([]string, string) {
 	var found []string
 	var proof string
@@ -370,9 +339,6 @@ func matchCRLFHeaders(status int, headers http.Header) ([]string, string) {
 	return found, proof
 }
 
-// ==================================================================
-// Loader
-// ==================================================================
 func loadLines(path string) ([]string, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -393,9 +359,6 @@ func loadLines(path string) ([]string, error) {
 	return out, sc.Err()
 }
 
-// ==================================================================
-// URL helpers
-// ==================================================================
 func normalizeBase(u string) string {
 	u = strings.TrimSpace(u)
 	u = strings.TrimRight(u, "/")
@@ -427,9 +390,6 @@ func replaceHostnameVar(s, base string) string {
 	return strings.ReplaceAll(s, "{{Hostname}}", u.Host)
 }
 
-// ==================================================================
-// HTTP
-// ==================================================================
 func buildClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout: timeout,
@@ -445,6 +405,10 @@ func buildClient(timeout time.Duration) *http.Client {
 }
 
 func sendRequest(method, rawURL string, headers map[string]string, body string) (int, string, http.Header, error) {
+	if delayMs > 0 {
+		time.Sleep(time.Duration(delayMs) * time.Millisecond)
+	}
+
 	var r io.Reader
 	if body != "" {
 		r = strings.NewReader(body)
@@ -473,9 +437,6 @@ func sendRequest(method, rawURL string, headers map[string]string, body string) 
 	return resp.StatusCode, string(b), resp.Header, nil
 }
 
-// ==================================================================
-// Finding
-// ==================================================================
 type Finding struct {
 	Tag        string    `json:"tag"`
 	URL        string    `json:"url"`
@@ -515,9 +476,6 @@ func printFinding(f Finding) {
 	}
 }
 
-// ==================================================================
-// Scanners (dengan check reachedHitLimit())
-// ==================================================================
 func scanLFIFuzz(pattern string, payloads []string, method string, headers map[string]string, body string, onHit func(Finding)) {
 	for _, payload := range payloads {
 		if shouldStop() || reachedHitLimit() {
@@ -804,13 +762,11 @@ func scanXSSFuzz(pattern string, payloads []string, method string, headers map[s
 	}
 }
 
-// ==================================================================
-// PoC writer
-// ==================================================================
 func writePoc(path string, findings []Finding) error {
 	seen := map[string]bool{}
 	var lines []string
 	lines = append(lines, "# ChimeraScan PoC - "+time.Now().Format("2006-01-02 15:04:05"))
+	lines = append(lines, "# Developer: "+authorName)
 	if interrupted {
 		lines = append(lines, "# NOTE: scan was interrupted by user (Ctrl+C) — partial results")
 	}
@@ -832,9 +788,6 @@ func writePoc(path string, findings []Finding) error {
 	return os.WriteFile(path, []byte(strings.Join(lines, "\n")+"\n"), 0644)
 }
 
-// ==================================================================
-// Main
-// ==================================================================
 type headerList []string
 
 func (h *headerList) String() string { return strings.Join(*h, ", ") }
@@ -874,6 +827,8 @@ func printBanner() {
 	fmt.Println(cBlue + strings.Repeat("=", 70) + cReset)
 	fmt.Println(cBold + "  " + cCyan + "ChimeraScan" + cReset + cBold + "  —  LFI · CRLF · SSRF · Open Redirect · XSS" + cReset)
 	fmt.Println(cDim + "  Penta-threat web vulnerability fuzzer" + cReset)
+	fmt.Println(cMag + "  👤 Developer by " + cBold + cCyan + authorName + cReset)
+	fmt.Println(cDim + "  📦 " + repoURL + cReset)
 	fmt.Println(cBlue + strings.Repeat("=", 70) + cReset)
 }
 
@@ -913,6 +868,7 @@ func main() {
 		timeoutS   int
 		verboseF   bool
 		hitFlag    int
+		delayFlag  float64
 		pocFlag    bool
 		uaFileFlag string
 		uaRandFlag bool
@@ -924,6 +880,7 @@ func main() {
 	flag.StringVar(&tagsFlag, "tags", "", "Modules: lfi, crlf, ssrf, openredirect, xss (empty = all)")
 	flag.BoolVar(&fuzzFlag, "fuzz", false, "Enable fuzzing (replace FUZZ). LFI, SSRF, Open Redirect & XSS. CRLF is always nofuzz")
 	flag.IntVar(&hitFlag, "hit", 0, "Stop after N vulnerable findings (0 = scan all payloads, default: 0)")
+	flag.Float64Var(&delayFlag, "delay", 0, "Delay between requests (seconds). Supports decimals: 0.5, 1, 2.5 (default: 0)")
 	flag.BoolVar(&pocFlag, "poc", false, "Auto-save hitting URLs to poc.txt")
 	flag.StringVar(&outFlag, "o", "", "Save findings to JSON")
 	flag.StringVar(&method, "X", "GET", "HTTP method")
@@ -937,7 +894,9 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "ChimeraScan — Penta-threat web vulnerability fuzzer\n")
-		fmt.Fprintf(os.Stderr, "(LFI | CRLF | SSRF | Open Redirect | XSS)\n\n")
+		fmt.Fprintf(os.Stderr, "(LFI | CRLF | SSRF | Open Redirect | XSS)\n")
+		fmt.Fprintf(os.Stderr, "Developer: %s\n", authorName)
+		fmt.Fprintf(os.Stderr, "Repo     : %s\n\n", repoURL)
 		fmt.Fprintf(os.Stderr, "Structure:\n")
 		fmt.Fprintf(os.Stderr, "  Ua.txt                              -> User-Agent list (one per line)\n")
 		fmt.Fprintf(os.Stderr, "  lfi/fuzzing/payload.txt             -> payload only (replace FUZZ)\n")
@@ -952,10 +911,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  -hit=2       -> stop after 2 vulnerable findings\n")
 		fmt.Fprintf(os.Stderr, "  -hit=1       -> stop after first finding\n")
 		fmt.Fprintf(os.Stderr, "  (no -hit)    -> scan ALL payloads (default)\n\n")
+		fmt.Fprintf(os.Stderr, "Delay (rate limiting per worker):\n")
+		fmt.Fprintf(os.Stderr, "  -delay=0.5   -> wait 500ms between requests\n")
+		fmt.Fprintf(os.Stderr, "  -delay=1     -> wait 1s between requests\n")
+		fmt.Fprintf(os.Stderr, "  -delay=2.5   -> wait 2.5s between requests\n")
+		fmt.Fprintf(os.Stderr, "  (no -delay)  -> no delay (default)\n\n")
 		fmt.Fprintf(os.Stderr, "Examples:\n")
 		fmt.Fprintf(os.Stderr, "  %s -u 'https://example.com/?q=FUZZ' -tags xss -fuzz\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "  %s -u 'https://example.com/?q=FUZZ' -tags xss -fuzz -hit=2\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "  %s -u https://example.com -tags lfi,ssrf\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -u 'https://example.com/?q=FUZZ' -tags xss -fuzz -hit=2 -delay=0.5\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -u https://example.com -tags lfi,ssrf -delay=1\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s -u https://example.com -tags lfi,ssrf,openredirect,xss -fuzz -poc\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s -u https://example.com\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "      -> all modules (XSS skipped unless -fuzz)\n\n")
@@ -970,6 +934,10 @@ func main() {
 	if hitLimit < 0 {
 		hitLimit = 0
 	}
+	if delayFlag < 0 {
+		delayFlag = 0
+	}
+	delayMs = int64(delayFlag * 1000)
 	headers := parseHeaders(headersFlag)
 	uaRandomize = uaRandFlag
 
@@ -981,7 +949,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// ---- Tags ----
 	tags := parseTags(tagsFlag)
 	runAll := len(tags) == 0
 	runLFI := runAll || tags["lfi"]
@@ -996,7 +963,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// ---- XSS: fuzz only ----
 	if runXSS && !fuzzFlag {
 		if tags["xss"] && len(tags) == 1 {
 			fmt.Printf("%s[!] XSS module requires -fuzz flag. Re-run with: -tags xss -fuzz%s\n",
@@ -1006,7 +972,6 @@ func main() {
 		runXSS = false
 	}
 
-	// ---- Base URLs ----
 	var bases []string
 	if urlFlag != "" {
 		bases = []string{urlFlag}
@@ -1026,7 +991,6 @@ func main() {
 		bases[i] = normalizeBase(b)
 	}
 
-	// ---- Load payloads ----
 	var (
 		lfiPayloads  []string
 		lfiFile      string
@@ -1117,8 +1081,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-
-	// ---- Fuzzing validation ----
+	
 	if fuzzFlag && (runLFI || runSSRF || runOR || runXSS) {
 		headersJoined := strings.Join(headersFlag, " ")
 		found := false
@@ -1137,11 +1100,9 @@ func main() {
 		}
 	}
 
-	// ---- Setup ----
 	timeout := time.Duration(timeoutS) * time.Second
 	httpClient = buildClient(timeout)
 
-	// ---- Banner ----
 	printBanner()
 
 	modeLFI := "OFF"
@@ -1219,10 +1180,16 @@ func main() {
 		fmt.Printf("%s[*] Hit limit   : %s∞ (scan all payloads)%s\n",
 			cCyan, cGreen, cReset)
 	}
+
+	if delayMs > 0 {
+		fmt.Printf("%s[*] Delay       : %s%.2fs%s between requests (per worker)\n",
+			cCyan, cYellow, delayFlag, cReset)
+	} else {
+		fmt.Printf("%s[*] Delay       : %soff%s\n", cCyan, cGreen, cReset)
+	}
 	fmt.Printf("%s[*] Ctrl+C      : once = save & stop, twice = force exit%s\n", cDim, cReset)
 	fmt.Println(cBlue + strings.Repeat("-", 70) + cReset)
 
-	// ---- Scan ----
 	var (
 		mu       sync.Mutex
 		findings []Finding
@@ -1327,7 +1294,6 @@ func main() {
 
 	elapsed := time.Since(start)
 
-	// ---- Summary ----
 	fmt.Println()
 	fmt.Println(cBlue + strings.Repeat("=", 70) + cReset)
 
@@ -1356,7 +1322,6 @@ func main() {
 	}
 	fmt.Println(cBlue + strings.Repeat("=", 70) + cReset)
 
-	// ---- Outputs ----
 	if pocFlag && len(findings) > 0 {
 		if err := writePoc(defaultPocFile, findings); err != nil {
 			fmt.Printf("%s[!] Failed to write PoC: %v%s\n", cRed, err, cReset)
