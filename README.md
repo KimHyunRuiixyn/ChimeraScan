@@ -819,24 +819,8 @@ git push origin feature/awesome-module
 ---
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░ STATS ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<h2 align="center">📊 Repository Stats</h2>
-
-<div align="center">
-
-<img src="https://github-readme-stats.vercel.app/api/pin/?username=YOUR_USERNAME&repo=ChimeraScan&theme=tokyonight&hide_border=true" />
-
-</div>
-
----
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- ░░░░░░░░░░░░░░░░░░░░░░░ FOOTER ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<img src="https://github.com/user-attachments/assets/9bfe1f82-7b50-4394-9b0c-bd9df824719e"/>
-
 <div align="center">
 
 <img src="https://github.com/user-attachments/assets/9bfe1f82-7b50-4394-9b0c-bd9df824719e" alt="Footer typing"/>
