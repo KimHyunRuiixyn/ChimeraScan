@@ -828,10 +828,6 @@ git push origin feature/awesome-module
 
 <img src="https://github-readme-stats.vercel.app/api/pin/?username=YOUR_USERNAME&repo=ChimeraScan&theme=tokyonight&hide_border=true" />
 
-<br/><br/>
-
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=YOUR_USERNAME&theme=tokyo-night&hide_border=true&area=true&custom_title=ChimeraScan%20Activity" />
-
 </div>
 
 ---
