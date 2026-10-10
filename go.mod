@@ -1,3 +1,3 @@
-module github.com/KimHyunRuiixyn/ChimeraScan
+module chimerascan
 
 go 1.21
