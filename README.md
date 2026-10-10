@@ -70,7 +70,7 @@
 
 > **Chimera** *(mythical beast with multiple heads)* + **Scan**
 >
-> Just as the Chimera combines **five different beasts** in one body,
+> Just as the Chimera combines **five different creatures** in one body,
 > **ChimeraScan** combines **five vulnerability classes** in one tool.
 
 </div>
@@ -215,27 +215,27 @@ go build -o chimerascan .
 
 ---
 
-## 🎯 Hit Limit Behaviour
+## 🎯 Hit Limit Behavior
 
-Fitur penting untuk efisiensi scanning — **kapan harus berhenti?**
+An important feature for efficient scanning — **when should the scan stop?**
 
-| Command | Behaviour |
+| Command | Behavior |
 |---------|-----------|
-| *(tanpa `-hit`)* | 🔁 Scan **SEMUA** payload sampai habis |
-| `-hit=1` | 🛑 Stop setelah **1** vuln ketemu (paling cepat) |
-| `-hit=2` | 🛑 Stop setelah **2** vuln ketemu |
-| `-hit=10` | 🛑 Stop setelah **10** vuln ketemu |
-| `-hit=0` | 🔁 Sama dengan tanpa `-hit` (unlimited) |
+| *(without `-hit`)* | 🔁 Scan **ALL** payloads until completion |
+| `-hit=1` | 🛑 Stop after **1** vulnerability is found (fastest) |
+| `-hit=2` | 🛑 Stop after **2** vulnerabilities are found |
+| `-hit=10` | 🛑 Stop after **10** vulnerabilities are found |
+| `-hit=0` | 🔁 Sama dengan without `-hit` (unlimited) |
 
 **Contoh:**
 ```bash
-# Cari 3 vuln, lalu stop
+# Find 3 vulnerabilities, then stop
 ./chimerascan -u "https://example.com/?q=FUZZ" -tags xss,lfi -fuzz -hit=3
 
-# Full enumeration (default) — semua payload dites
+# Full enumeration (default) — test every payload
 ./chimerascan -u "https://example.com/?q=FUZZ" -tags xss -fuzz
 
-# Test satu payload saja per modul
+# Test only one payload per module
 ./chimerascan -u "https://example.com/?q=FUZZ" -tags xss -fuzz -hit=1
 ```
 
@@ -372,7 +372,7 @@ ChimeraScan/
 <td width="33%" valign="top">
 
 ### 🐉 LFI
-<sub>scans **response body**</sub>
+<sub>scans the **response body**</sub>
 
 - Linux `/etc/passwd` markers
 - Windows `win.ini`, `boot.ini`
@@ -385,7 +385,7 @@ ChimeraScan/
 <td width="33%" valign="top">
 
 ### 💉 CRLF
-<sub>scans **response headers**</sub>
+<sub>scans the **response headers**</sub>
 
 - `Location: www.evil.com`
 - `Set-Cookie: coffin=hi`
@@ -396,7 +396,7 @@ ChimeraScan/
 <td width="33%" valign="top">
 
 ### 🌐 SSRF
-<sub>scans **response body**</sub>
+<sub>scans the **response body**</sub>
 
 - AWS/GCP/Azure metadata
 - Alibaba/DigitalOcean metadata
@@ -409,7 +409,7 @@ ChimeraScan/
 <td width="33%" valign="top">
 
 ### 🔗 Open Redirect
-<sub>scans **response headers**</sub>
+<sub>scans the **response headers**</sub>
 
 - Status `301/302/303/307/308`
 - `Location: https://bing.com`
@@ -419,10 +419,10 @@ ChimeraScan/
 <td width="33%" valign="top">
 
 ### ⚡ XSS
-<sub>scans **response body**</sub>
+<sub>scans the **response body**</sub>
 
-- Raw reflection of the payload
-- Payload appears unencoded
+- Raw payload reflection
+- Payload appears without encoding
 - **Manual verification required** for confirmation
 
 </td>
@@ -430,7 +430,7 @@ ChimeraScan/
 
 ### 🎭 UA Rotation
 
-- `Ua.txt` — one UA per line
+- `Ua.txt` — one user agent per line
 - Round-robin (default)
 - Random mode (`-ua-random`)
 - Override via `-H "User-Agent:..."`
@@ -452,11 +452,11 @@ ChimeraScan/
 <div align="center">
 
 ```
-       User presses Ctrl+C
+       The user presses Ctrl+C
               │
               ▼
        ┌──────────────┐
-       │ 1st press?   │──no──▶ 🔴 Force exit (code 130)
+       │ First press?   │──no──▶ 🔴 Force exit (code 130)
        └──────┬───────┘
               │ yes
               ▼
@@ -484,15 +484,15 @@ ChimeraScan/
 ```ansi
 ======================================================================
   ChimeraScan  —  LFI · CRLF · SSRF · Open Redirect · XSS
-  Penta-threat web vulnerability fuzzer
+  Five-class web vulnerability fuzzer
 ======================================================================
 [*] Tags        : lfi, ssrf, xss
-[*] Mode LFI    : FUZZ (placeholder=FUZZ)
-[*] Mode SSRF   : FUZZ (placeholder=FUZZ)
-[*] Mode CRLF   : OFF
-[*] Mode OR     : OFF
-[*] Mode XSS    : FUZZ (placeholder=FUZZ)
-[*] Bases       : 1
+[*] LFI mode    : FUZZ (placeholder=FUZZ)
+[*] SSRF mode   : FUZZ (placeholder=FUZZ)
+[*] CRLF mode   : OFF
+[*] Open Redirect mode     : OFF
+[*] XSS mode    : FUZZ (placeholder=FUZZ)
+[*] Base URLs       : 1
 [*] LFI src     : lfi/fuzzing/payload.txt (100 item)
 [*] SSRF src    : ssrf/fuzzing/payload.txt (100 item)
 [*] XSS src     : xss/fuzzing/payload.txt (50 item)
@@ -500,7 +500,7 @@ ChimeraScan/
 [*] Method      : GET
 [*] Threads     : 20   Timeout: 15s
 [*] Hit limit   : 2 (stop after 2 finding(s))
-[*] Ctrl+C      : once = save & stop, twice = force exit
+[*] Ctrl+C      : once = save and stop, twice = force exit
 ----------------------------------------------------------------------
 
 [+][XSS] HIT
@@ -519,8 +519,8 @@ ChimeraScan/
     Signatures : passwd-root, passwd-bin
     Proof      : root:x:0:0:root:/root:/bin/bash
 
-[=] Done (hit limit reached).  Bases: 1  |  Requests: 42  |  Hits: 2  |  Time: 2.1s
-    Reached -hit=2 limit — scan stopped early.
+[=] Done (hit limit reached).  Base URLs: 1  |  Requests: 42  |  Findings: 2  |  Time: 2.1s
+    Reached the -hit=2 limit — scan stopped early.
 ======================================================================
 [*] PoC saved  : poc.txt (2 URL)
 [*] JSON saved : findings.json
@@ -596,7 +596,7 @@ Edit the signature arrays in `main.go`:
 ```go
 var lfiSignatures = []Signature{
     {"passwd-root", regexp.MustCompile(`root:[^:]*:0:0:`)},
-    {"my-signature", regexp.MustCompile(`my-pattern`)},   // add yours
+    {"my-signature", regexp.MustCompile(`my-pattern`)},   // add your own
 }
 ```
 
@@ -627,7 +627,7 @@ go build -o chimerascan .
 ║                                                                  ║
 ║   ⚠️  FOR AUTHORIZED SECURITY TESTING & EDUCATIONAL USE ONLY     ║
 ║                                                                  ║
-║   • Only test systems you OWN or have WRITTEN PERMISSION for     ║
+║   • Only test systems you OWN or have WRITTEN PERMISSION to test     ║
 ║   • Unauthorized scanning may violate laws:                      ║
 ║       - CFAA (US)                                                ║
 ║       - Computer Misuse Act (UK)                                 ║
@@ -662,7 +662,7 @@ go build -o chimerascan .
 | ✅ | User-Agent rotation |
 | ✅ | Hit limit (`-hit=N`) |
 | ✅ | PoC auto-save + JSON export |
-| ✅ | Safey delay (`--delay=1`)
+| ✅ | Safety delay (`--delay=1`)
 | ✅ | Graceful Ctrl+C |
 | 🚧 | OAST/Interactsh for blind SSRF / blind XSS |
 | 🚧 | WAF detection & auto-backoff |
